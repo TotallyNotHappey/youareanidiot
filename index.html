@@ -30,11 +30,15 @@
 <script>
   const audio = document.getElementById('audio');
   audio.play().then(() => {
-    audio.muted = false;
+    setTimeout(() => {
+      audio.muted = false;
+    }, 250);
   }).catch(() => {
     document.addEventListener('click', () => {
-      audio.muted = false;
-      audio.play();
+      setTimeout(() => {
+        audio.muted = false;
+        audio.play();
+      }, 250);
     }, { once: true });
   });
 </script>
