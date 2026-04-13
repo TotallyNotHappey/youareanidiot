@@ -19,40 +19,24 @@
     object-fit: contain;
     background: black;
   }
-  #overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-  }
-  #overlay span {
-    color: white;
-    font-size: 2rem;
-    font-family: sans-serif;
-    border: 2px solid white;
-    padding: 1rem 2rem;
-    border-radius: 8px;
-  }
 </style>
 </head>
 <body>
-<div id="overlay">
-  <span>Click to Start</span>
-</div>
 <img class="responsive-gif"
   src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.gif"
   alt="youareanidiot">
-<audio id="audio" loop>
+<audio id="audio" loop muted autoplay>
   <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.mp3" type="audio/mpeg">
 </audio>
 <script>
-  document.getElementById('overlay').addEventListener('click', function() {
-    document.getElementById('audio').play();
-    this.remove();
+  const audio = document.getElementById('audio');
+  audio.play().then(() => {
+    audio.muted = false;
+  }).catch(() => {
+    document.addEventListener('click', () => {
+      audio.muted = false;
+      audio.play();
+    }, { once: true });
   });
 </script>
 </body>
