@@ -4,11 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: black;
     min-height: 100vh;
@@ -23,7 +19,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #000000;
+    background: #000;
   }
   .gif-wrapper {
     width: 100%;
@@ -39,16 +35,43 @@
     object-fit: cover;
     display: block;
   }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+  }
+  #overlay span {
+    color: white;
+    font-size: 2rem;
+    font-family: sans-serif;
+    border: 2px solid white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+  }
 </style>
 </head>
 <body>
+<div id="overlay">
+  <span>Click to Start</span>
+</div>
 <div class="container">
   <div class="gif-wrapper">
     <img class="responsive-gif" src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.gif" alt="youareanidiot">
   </div>
 </div>
-<audio loop autoplay>
+<audio id="audio" loop>
   <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.mp3" type="audio/mpeg">
 </audio>
+<script>
+  document.getElementById('overlay').addEventListener('click', function() {
+    document.getElementById('audio').play();
+    this.remove();
+  });
+</script>
 </body>
 </html>
