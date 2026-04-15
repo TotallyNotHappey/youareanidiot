@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>idiot</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you-are-an-idiot.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: black;
+    overflow: hidden;
+  }
+  video {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  #shield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+<video id="v" autoplay loop muted playsinline>
+  <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you%20are%20an%20idiot!.mp4" type="video/mp4">
+</video>
+<div id="shield"></div>
+<script>
+  const v = document.getElementById('v');
 
+  // Unmute as soon as possible
+  v.play().then(() => {
+    setTimeout(() => { v.muted = false; }, 250);
+  }).catch(() => {
+    document.addEventListener('click', () => {
+      v.muted = false;
+      v.play();
+    }, { once: true });
+  });
+
+  // Prevent pausing by any means
+  v.addEventListener('pause', () => v.play());
+  v.addEventListener('ended', () => { v.currentTime = 0; v.play(); });
+  v.addEventListener('volumechange', () => {
+    if (v.muted) v.muted = false;
+    if (v.volume < 1) v.volume = 1;
+  });
+
+  // Block keyboard shortcuts (space, k, m, f, etc.)
+  document.addEventListener('keydown', e => e.preventDefault());
+
+  // Block right-click context menu
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Keep playing if tab becomes visible again
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && v.paused) v.play();
+  });
+</script>
+</body>
+</html>
