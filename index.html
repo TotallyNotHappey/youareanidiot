@@ -10,16 +10,16 @@
   html, body {
     width: 100%;
     height: 100%;
-    background: black;
+    background: white;
     overflow: hidden;
     cursor: pointer;
   }
   img {
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
     height: 100vh;
-    object-fit: cover;
+    width: auto;
   }
 </style>
 </head>
@@ -33,10 +33,10 @@
 <script>
   const a = document.getElementById('a');
 
-  // Try autoplay muted, then unmute
+  // Try autoplay muted, unmute after 250ms
   a.muted = true;
   a.play().then(() => {
-    a.muted = false;
+    setTimeout(() => { a.muted = false; }, 250);
   }).catch(() => {
     // Autoplay blocked — click will handle it
   });
