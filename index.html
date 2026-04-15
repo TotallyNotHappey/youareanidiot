@@ -10,8 +10,9 @@
     height: 100%;
     background: black;
     overflow: hidden;
+    cursor: pointer;
   }
-  .responsive-gif {
+  img {
     position: fixed;
     top: 0; left: 0;
     width: 100vw;
@@ -21,25 +22,24 @@
 </style>
 </head>
 <body>
-<img class="responsive-gif"
+<img
   src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.gif"
-  alt="youareanidiot">
-<audio id="audio" loop muted autoplay>
+  alt="">
+<audio id="a">
   <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.mp3" type="audio/mpeg">
 </audio>
 <script>
-  const audio = document.getElementById('audio');
-  audio.play().then(() => {
-    setTimeout(() => {
-      audio.muted = false;
-    }, 250);
+  const a = document.getElementById('a');
+  a.play().then(() => {
+    setTimeout(() => { a.muted = false; }, 250);
   }).catch(() => {
     document.addEventListener('click', () => {
-      setTimeout(() => {
-        audio.muted = false;
-        audio.play();
-      }, 250);
+      setTimeout(() => { a.muted = false; a.play(); }, 250);
     }, { once: true });
+  });
+
+  document.addEventListener('click', () => {
+    window.location.href = 'https://youareanidiot.jesusfuckinchrist.com/lol';
   });
 </script>
 </body>
