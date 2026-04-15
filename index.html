@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>idiot</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you-are-an-idiot.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
@@ -30,20 +32,20 @@
 </audio>
 <script>
   const a = document.getElementById('a');
-  let ready = false;
 
+  // Try autoplay muted, then unmute
+  a.muted = true;
   a.play().then(() => {
-    setTimeout(() => { a.muted = false; ready = true; }, 250);
+    a.muted = false;
   }).catch(() => {
-    document.addEventListener('click', () => {
-      a.muted = false;
-      a.play();
-      setTimeout(() => { ready = true; }, 250);
-    }, { once: true });
+    // Autoplay blocked — click will handle it
   });
 
+  // Any click: unmute + ensure playing, then redirect
   document.addEventListener('click', () => {
-    if (ready) window.location.href = 'https://youareanidiot.jesusfuckinchrist.com/lol';
+    a.muted = false;
+    if (a.paused) a.play();
+    window.location.href = 'https://youareanidiot.jesusfuckinchrist.com/lol';
   });
 </script>
 </body>
