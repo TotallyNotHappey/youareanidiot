@@ -12,41 +12,86 @@
     height: 100%;
     background: white;
     overflow: hidden;
-    cursor: pointer;
   }
-  img {
+  
+  /* The main GIF */
+  .main-gif {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     height: 100vh;
     width: auto;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  /* Control button styling */
+  .controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+
+  .controls img {
+    width: 32px;
+    height: 32px;
   }
 </style>
 </head>
 <body>
-<img
+
+<div class="controls" id="toggleBtn">
+  <img id="statusIcon" src="https://youareanidiot.cc/images/speakerm.avif" alt="Mute control">
+</div>
+
+<img class="main-gif" id="gif"
   src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.gif"
-  alt="">
-<audio id="a" loop muted autoplay>
+  alt="" onclick="handleRedirect()">
+
+<audio id="a" loop>
   <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/youareanidiot.mp3" type="audio/mpeg">
 </audio>
+
 <script>
   const a = document.getElementById('a');
+  const toggleBtn = document.getElementById('toggleBtn');
+  const statusIcon = document.getElementById('statusIcon');
 
-  // Try autoplay muted, unmute after 250ms
-  a.muted = true;
-  a.play().then(() => {
-    setTimeout(() => { a.muted = false; }, 250);
-  }).catch(() => {
-    // Autoplay blocked — click will handle it
+  const speakerOn = "https://youareanidiot.cc/images/speaker.avif";
+  const speakerOff = "https://youareanidiot.cc/images/speakerm.avif";
+
+  // Toggle Play/Pause and Icon
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent trigger redirect
+    if (a.paused) {
+      a.play();
+      statusIcon.src = speakerOn;
+    } else {
+      a.pause();
+      statusIcon.src = speakerOff;
+    }
   });
 
-  // Any click: unmute + ensure playing, then redirect
-  document.addEventListener('click', () => {
-    a.muted = false;
-    if (a.paused) a.play();
+  // Function for the original "idiot" behavior
+  function handleRedirect() {
     window.location.href = 'https://youareanidiot.jesusfuckinchrist.com/lol';
-  });
+  }
+
+  // Attempt initial play (often requires user interaction)
+  document.body.addEventListener('click', () => {
+    if (a.paused && statusIcon.src === speakerOn) {
+        a.play();
+    }
+  }, { once: true });
 </script>
 </body>
 </html>
