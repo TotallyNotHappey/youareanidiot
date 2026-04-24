@@ -1,569 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>you are an idiot - popup mayhem</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you-are-an-idiot.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>idiot</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you-are-an-idiot.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: black;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            background: black;
-            overflow: hidden;
-            font-family: 'Arial', 'Helvetica', sans-serif;
-        }
+  /* Video Styling */
+  video {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    height: 100vh;
+    width: auto;
+    /* Removed transition for instant grey/color swap */
+    pointer-events: none;
+  }
 
-        /* main video canvas */
-        video {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            height: 100vh;
-            width: auto;
-            pointer-events: none;
-            z-index: 1;
-        }
+  /* Grey out effect */
+  .greyed {
+    filter: grayscale(100%) brightness(40%);
+  }
 
-        /* grey filter when paused */
-        .greyed {
-            filter: grayscale(100%) brightness(40%);
-        }
+  /* UI Overlay */
+  #shield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
 
-        /* main overlay shield (play/pause trigger) */
-        #shield {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            background: transparent;
-        }
+  /* The Play/Pause Button Container */
+  #btn-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    user-select: none;
+    /* Removed transition and transform effects */
+  }
 
-        /* button container */
-        #btn-container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            user-select: none;
-            text-shadow: 0 0 8px rgba(0,0,0,0.5);
-        }
+  /* Large Circle ◯ */
+  .circle-base {
+    font-size: 180px; 
+    line-height: 1;
+  }
 
-        .circle-base {
-            font-size: 180px;
-            line-height: 1;
-            font-weight: normal;
-        }
+  /* The symbol inside the circle */
+  .icon-overlay {
+    position: absolute;
+    font-size: 125px; 
+    margin-top: -10px;
+    margin-left: 25px; 
+  }
 
-        .icon-overlay {
-            position: absolute;
-            font-size: 125px;
-            margin-top: -10px;
-            margin-left: 25px;
-        }
+  .icon-overlay.is-pause {
+    margin-left: 0;
+    margin-top: -5px; /* Slight adjustment for visual centering of pause */
+  }
 
-        .icon-overlay.is-pause {
-            margin-left: 0;
-            margin-top: -5px;
-        }
-
-        /* popup window styling - like the classic youareanidiot windows */
-        .idiot-popup {
-            position: fixed;
-            width: 400px;
-            background: #c0c0c0;
-            border: 3px ridge #ffffff;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.6);
-            font-family: 'Courier New', 'MS Sans Serif', Arial, monospace;
-            z-index: 10000;
-            cursor: move;
-            transition: none;
-            animation: popFade 0.2s ease-out;
-        }
-
-        @keyframes popFade {
-            0% { opacity: 0; transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .popup-titlebar {
-            background: #000080;
-            color: white;
-            padding: 6px 8px;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: grab;
-            border-bottom: 1px solid #ffffff;
-        }
-
-        .popup-titlebar:active {
-            cursor: grabbing;
-        }
-
-        .popup-controls {
-            display: flex;
-            gap: 6px;
-        }
-
-        .popup-controls span {
-            background: silver;
-            color: black;
-            width: 22px;
-            height: 22px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            border: 1px outset white;
-            cursor: pointer;
-            font-family: monospace;
-        }
-
-        .popup-controls span:hover {
-            background: darkgray;
-        }
-
-        .popup-content {
-            padding: 16px;
-            background: #e0e0e0;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            color: #000000;
-            border: 2px inset #f0f0f0;
-        }
-
-        .popup-content img {
-            width: 80px;
-            height: 80px;
-            image-rendering: crisp-edges;
-            margin-bottom: 10px;
-        }
-
-        .popup-buttons {
-            margin-top: 18px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .popup-buttons button {
-            background: #c0c0c0;
-            border: 2px outset white;
-            padding: 5px 20px;
-            font-weight: bold;
-            font-family: inherit;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .popup-buttons button:active {
-            border: 2px inset white;
-        }
-
-        /* hidden counter for debug but fine */
-        .hidden-timer {
-            display: none;
-        }
-
-        /* ensure video is behind popups but shield still blocks clicks */
-        body {
-            overflow: hidden;
-        }
-    </style>
+  /* Removed #shield:active scaling to prevent shrinking */
+</style>
 </head>
 <body>
 
 <video id="v" loop playsinline>
-    <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you%20are%20an%20idiot!.mp4" type="video/mp4">
+  <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you%20are%20an%20idiot!.mp4" type="video/mp4">
 </video>
 
 <div id="shield">
-    <div id="btn-container">
-        <span class="circle-base">◯</span>
-        <span id="icon" class="icon-overlay">▶</span>
-    </div>
+  <div id="btn-container">
+    <span class="circle-base">◯</span>
+    <span id="icon" class="icon-overlay">▶</span>
+  </div>
 </div>
 
 <script>
-    (function() {
-        // ----- DOM elements
-        const video = document.getElementById('v');
-        const shield = document.getElementById('shield');
-        const iconSpan = document.getElementById('icon');
-        const btnContainer = document.getElementById('btn-container');
-        
-        // ----- Popup system state
-        let popupIntervalId = null;          // setInterval handle
-        let remainingSeconds = 25;            // remaining seconds until next popup
-        let timerLastTimestamp = 0;            // performance tracking for accurate 25 seconds
-        let videoWasPlaying = true;             // current playback state
-        let animationFrameId = null;
-        let popupWindows = [];                  // array to keep references (optional cleanup)
-        let popupIdCounter = 0;
-        
-        // ----- style init: video starts grey & paused
-        video.classList.add('greyed');
-        video.pause();
-        video.muted = false;   // not muted, but autoplay policies handled by user click
-        
-        // ensure volume is forced max (legacy security)
-        video.volume = 1;
-        
-        // ----- classic IDIOT popup creator (inspired by youareanidiot.cc)
-        function spawnIdiotPopup() {
-            if (!video.paused) {
-                // only spawn popups if video is playing (the madness is active)
-                // but note: timer is paused when video paused, so this only runs when playing.
-                createPopupWindow();
-            }
-        }
-        
-        // function to create a single movable popup with "you are an idiot" content
-        function createPopupWindow() {
-            const popupDiv = document.createElement('div');
-            popupDiv.className = 'idiot-popup';
-            const popupId = 'popup_' + (++popupIdCounter);
-            popupDiv.id = popupId;
-            
-            // random position but avoid overlapping too harshly? we just randomize
-            const winWidth = 400;
-            const winHeight = 280;
-            const maxX = window.innerWidth - winWidth - 20;
-            const maxY = window.innerHeight - winHeight - 40;
-            const leftPos = Math.max(10, Math.random() * maxX);
-            const topPos = Math.max(10, Math.random() * maxY);
-            popupDiv.style.left = leftPos + 'px';
-            popupDiv.style.top = topPos + 'px';
-            popupDiv.style.width = winWidth + 'px';
-            
-            // Title bar content (classic)
-            popupDiv.innerHTML = `
-                <div class="popup-titlebar" data-popup-id="${popupId}">
-                    <span>⚠️ YOU ARE AN IDIOT! ⚠️</span>
-                    <div class="popup-controls">
-                        <span class="popup-close">✖</span>
-                    </div>
-                </div>
-                <div class="popup-content">
-                    <img src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you-are-an-idiot.png" alt="idiot" style="display:block; margin:0 auto;">
-                    <div style="margin-top: 8px;">⚠️ YOU ARE AN IDIOT! ⚠️</div>
-                    <div style="font-size:13px; margin-top:6px;">Why did you click this?</div>
-                    <div class="popup-buttons">
-                        <button class="ok-btn">OK</button>
-                        <button class="close-btn">X</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(popupDiv);
-            
-            // make draggable
-            const titlebar = popupDiv.querySelector('.popup-titlebar');
-            let isDragging = false;
-            let dragOffsetX = 0, dragOffsetY = 0;
-            
-            titlebar.addEventListener('mousedown', (e) => {
-                if (e.target.classList && e.target.classList.contains('popup-close')) return;
-                isDragging = true;
-                const rect = popupDiv.getBoundingClientRect();
-                dragOffsetX = e.clientX - rect.left;
-                dragOffsetY = e.clientY - rect.top;
-                popupDiv.style.cursor = 'grabbing';
-                e.preventDefault();
-            });
-            
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                let newLeft = e.clientX - dragOffsetX;
-                let newTop = e.clientY - dragOffsetY;
-                newLeft = Math.min(Math.max(0, newLeft), window.innerWidth - popupDiv.offsetWidth);
-                newTop = Math.min(Math.max(0, newTop), window.innerHeight - popupDiv.offsetHeight);
-                popupDiv.style.left = newLeft + 'px';
-                popupDiv.style.top = newTop + 'px';
-            });
-            
-            window.addEventListener('mouseup', () => {
-                isDragging = false;
-                popupDiv.style.cursor = '';
-            });
-            
-            // close functionality
-            const closeBtn = popupDiv.querySelector('.popup-close');
-            const okBtn = popupDiv.querySelector('.ok-btn');
-            const closeBtn2 = popupDiv.querySelector('.close-btn');
-            
-            const removePopup = () => {
-                if (popupDiv && popupDiv.parentNode) popupDiv.remove();
-                // remove from tracking array
-                const idx = popupWindows.indexOf(popupDiv);
-                if (idx !== -1) popupWindows.splice(idx, 1);
-            };
-            
-            closeBtn.addEventListener('click', removePopup);
-            if (okBtn) okBtn.addEventListener('click', removePopup);
-            if (closeBtn2) closeBtn2.addEventListener('click', removePopup);
-            
-            // also auto-trap that clicking outside doesn't matter, keep persistent until closed
-            popupWindows.push(popupDiv);
-            
-            // optional: aggressive stacking - not needed, just chaos
-        }
-        
-        // ------ TIMER LOGIC: countdown 25 seconds while video playing, spawn when reaches zero, then reset
-        function resetTimer() {
-            remainingSeconds = 25;
-            timerLastTimestamp = performance.now();
-        }
-        
-        function startTimerUpdater() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            
-            function updateTimer(now) {
-                if (!timerLastTimestamp) {
-                    timerLastTimestamp = now;
-                    animationFrameId = requestAnimationFrame(updateTimer);
-                    return;
-                }
-                
-                const deltaSeconds = (now - timerLastTimestamp) / 1000;
-                if (deltaSeconds > 0 && videoWasPlaying && !video.paused) {
-                    // only subtract if video is actually playing and we are in playing state
-                    if (remainingSeconds > 0) {
-                        remainingSeconds -= deltaSeconds;
-                        if (remainingSeconds <= 0) {
-                            // time to spawn a popup!
-                            remainingSeconds = 0;
-                            spawnIdiotPopup();
-                            // reset timer to 25 seconds after spawning
-                            remainingSeconds = 25;
-                            timerLastTimestamp = now;
-                        } else {
-                            timerLastTimestamp = now;
-                        }
-                    } else {
-                        // fallback
-                        if (remainingSeconds <= 0) {
-                            spawnIdiotPopup();
-                            remainingSeconds = 25;
-                            timerLastTimestamp = now;
-                        } else {
-                            timerLastTimestamp = now;
-                        }
-                    }
-                } else {
-                    // video is paused: timer should freeze. Keep timerLastTimestamp unchanged? we don't want move.
-                    // we just don't subtract but also we keep timerLastTimestamp so that resume resumes correctly
-                    // to avoid time jumps, we keep timerLastTimestamp as old, but not advance.
-                    // also need to keep same remainingSeconds
-                    // we basically do nothing, but we refresh animation frame
-                }
-                animationFrameId = requestAnimationFrame(updateTimer);
-            }
-            
-            timerLastTimestamp = performance.now();
-            animationFrameId = requestAnimationFrame(updateTimer);
-        }
-        
-        // sync video pause/play with UI and timer freeze condition
-        function handleToggle() {
-            if (video.paused) {
-                // playing video
-                video.play().then(() => {
-                    video.classList.remove('greyed');
-                    iconSpan.innerText = "⏸";
-                    iconSpan.classList.add('is-pause');
-                    btnContainer.style.display = "none";
-                    videoWasPlaying = true;
-                    // timer continues from its current remainingSeconds, we don't reset timer on resume
-                    // timer natural deduction will continue because videoWasPlaying true and video not paused
-                    // we also ensure last timestamp correction to avoid huge delta: resetLastTimestamp slightly
-                    // avoid big jump: adjust timerLastTimestamp to current time so delta small.
-                    timerLastTimestamp = performance.now();
-                }).catch(e => {
-                    // autoplay blocked? but user clicked shield, usually works
-                    console.warn("play failed", e);
-                });
-            } else {
-                // pause video
-                video.pause();
-                video.classList.add('greyed');
-                iconSpan.innerText = "▶";
-                iconSpan.classList.remove('is-pause');
-                btnContainer.style.display = "flex";
-                videoWasPlaying = false;
-                // Timer remains frozen (remainingSeconds unchanged) because videoWasPlaying flag blocks decrement
-                // Also we don't modify timerLastTimestamp, perfect pause.
-            }
-        }
-        
-        // block any context menu and keyboard shortcuts
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-        document.addEventListener('keydown', (e) => {
-            // prevent F5, Ctrl+R, etc minimal annoyance
-            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.key === 'R')) {
-                e.preventDefault();
-            }
-            if (e.key === ' ' || e.key === 'Space') {
-                // optional: but we might not want space to trigger? we prevent default but not interfere
-                e.preventDefault();
-            }
-        });
-        
-        // enforce volume always max
-        video.addEventListener('volumechange', () => {
-            if (video.volume < 1) video.volume = 1;
-        });
-        
-        // Extra security: force video to stay playing if user tries to use browser media controls? but shield blocks click mostly
-        // Also cleanup popups on window resize to reposition? Not needed, but maybe re-adjust if they go offscreen? optional but fine.
-        window.addEventListener('resize', () => {
-            for (let pop of popupWindows) {
-                if (pop) {
-                    let left = parseFloat(pop.style.left);
-                    let top = parseFloat(pop.style.top);
-                    const maxLeft = window.innerWidth - pop.offsetWidth;
-                    const maxTop = window.innerHeight - pop.offsetHeight;
-                    if (left > maxLeft) pop.style.left = Math.max(0, maxLeft) + 'px';
-                    if (top > maxTop) pop.style.top = Math.max(0, maxTop) + 'px';
-                    if (left < 0) pop.style.left = '10px';
-                    if (top < 0) pop.style.top = '10px';
-                }
-            }
-        });
-        
-        // shield click toggles playback
-        shield.addEventListener('click', handleToggle);
-        
-        // Initialize timer system and start countdown but video initially paused, so timer is frozen.
-        // However we set initial remainingSeconds = 25, videoWasPlaying = false.
-        videoWasPlaying = false;
-        remainingSeconds = 25;
-        startTimerUpdater();
-        
-        // additional anti-lost focus: if video ends (looping) we maintain state, but loop keeps playing
-        video.addEventListener('ended', () => {
-            // loop attribute ensures replay, but just in case
-            if (!video.paused) video.play();
-        });
-        
-        // extra protection: sync the gray filter if something external tries to modify
-        // also make sure that the popup spam only when video is playing
-        // finally: on page load, sometimes we need to ensure video muted flag? not needed.
-        // Also set initial timestamp so timer frozen
-        timerLastTimestamp = performance.now();
-        
-        // optional master killswitch for performance, but popups are fine.
-        // Overkill: limit max popups? no, because the original youareanidiot makes infinite, but we let it as long as video runs.
-        // Each popup is closable but they will spawn every 25 seconds of playtime.
-        // Ensure timer doesn't go negative if some glitch
-        // Also we must guarantee that even if many popups, timer keeps on ticking based on actual playing time.
-        // perfect
-        
-        // manual: addition - if the video is blocked due to autoplay policy, user clicks to start, timer begins fresh
-        // after play, the timer will have remainingSeconds = 25 and start counting.
-        // Extra: make popups match the style from youareanidiot.cc: blinking text? but we have image + red text
-        // fine. also added "OK" "X" buttons for retro.
-        
-        // For extra punch, also allow any new spawned windows to play a sound? but not necessary because original video audio
-        // is playing.
-        // also allow that new popup windows never block the video click shield; z-index fine
-        
-        // debug optional: simulate that the timer runs only at real time when video plays.
-        // after extensive test, everything works.
-        console.log("POPUP SYSTEM ACTIVE: Popups appear every 25 seconds of video playback, timer pauses when video paused.");
-        
-        // If user tries to click through shield to video right click etc: all disabled, just toggle
-        
-        // also ensure that initially no popup until video plays first time
-        // finally, add a small fallback if video never started: remain grey, timer idle.
-        // extra: create a sanity method that kills intervals on page unload
-        window.addEventListener('beforeunload', () => {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            for(let p of popupWindows) {
-                if(p && p.remove) p.remove();
-            }
-        });
-        
-        // massive style: also ensure that video is always centered regardless of popups
-        // we also stop propagation on shield to avoid any bubbling
-        shield.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-        
-        // disallow double click to fullscreen weirdness
-        video.addEventListener('dblclick', (e) => e.preventDefault());
-        
-        // final: force video loop reattempt if something external pauses due to context?
-        video.loop = true;
-        
-        // For completeness: un-mute if browser policy allows 
-        // But we don't set muted, so audio comes in when user interacts
-        // initial state: video muted? not needed, but we set volume to 1.
-        video.volume = 1;
-        // preload metadata
-        video.load();
-        
-        // manual compatibility with the provided video URL: it should work.
-        // Also set that progress timers are accurate.
-        // ensure shield displays correctly
-        
-        // Extra: bypass any possible 'pause' from other scripts
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // nothing, ignore, but we don't want timer during hidden? keep as same behavior.
-                // but browser may throttle, we still operate, it's fine, popups still appear when visible again.
-            }
-        });
-        
-        // ensure that if the video element gets somehow paused by external, we sync UI
-        video.addEventListener('pause', () => {
-            if (!video.paused) return;
-            // but if shield triggered pause it's fine, but external?
-            if (videoWasPlaying !== false) {
-                videoWasPlaying = false;
-                video.classList.add('greyed');
-                iconSpan.innerText = "▶";
-                iconSpan.classList.remove('is-pause');
-                btnContainer.style.display = "flex";
-            }
-        });
-        
-        video.addEventListener('play', () => {
-            if (video.paused === false && videoWasPlaying !== true) {
-                videoWasPlaying = true;
-                video.classList.remove('greyed');
-                iconSpan.innerText = "⏸";
-                iconSpan.classList.add('is-pause');
-                btnContainer.style.display = "none";
-                timerLastTimestamp = performance.now();
-            }
-        });
-        
-        // final small thing: ensures greyed on page load - DONE
-        
-        // optionally, we want to protect from multiple timers, but already use requestAnimationFrame singleton.
-        // Also provides "25 seconds pause when video is paused as well" feature.
-    })();
+  const v = document.getElementById('v');
+  const shield = document.getElementById('shield');
+  const icon = document.getElementById('icon');
+  const btnContainer = document.getElementById('btn-container');
+
+  // Initial State
+  v.classList.add('greyed');
+
+  function handleToggle() {
+    if (v.paused) {
+      v.play();
+      v.muted = false;
+      v.classList.remove('greyed');
+      icon.innerText = "⏸"; 
+      icon.classList.add('is-pause');
+      // Instant hide
+      btnContainer.style.display = "none"; 
+    } else {
+      v.pause();
+      v.classList.add('greyed');
+      icon.innerText = "▶";
+      icon.classList.remove('is-pause');
+      // Instant show
+      btnContainer.style.display = "flex";
+    }
+  }
+
+  shield.addEventListener('click', handleToggle);
+
+  // Security & Persistence
+  document.addEventListener('keydown', e => e.preventDefault());
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  v.addEventListener('volumechange', () => { if (v.volume < 1) v.volume = 1; });
 </script>
 </body>
 </html>
