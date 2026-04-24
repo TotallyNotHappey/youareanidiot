@@ -12,69 +12,118 @@
     height: 100%;
     background: black;
     overflow: hidden;
+    font-family: Arial, sans-serif;
   }
+
+  /* Video Styling */
   video {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     height: 100vh;
     width: auto;
+    /* Removed transition for instant grey/color swap */
     pointer-events: none;
   }
+
+  /* Grey out effect */
+  .greyed {
+    filter: grayscale(100%) brightness(40%);
+  }
+
+  /* UI Overlay */
   #shield {
     position: fixed;
     top: 0; left: 0;
     width: 100vw;
     height: 100vh;
     z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
   }
+
+  /* The Play/Pause Button Container */
+  #btn-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    user-select: none;
+    /* Removed transition and transform effects */
+  }
+
+  /* Large Circle ◯ */
+  .circle-base {
+    font-size: 180px; 
+    line-height: 1;
+  }
+
+  /* The symbol inside the circle */
+  .icon-overlay {
+    position: absolute;
+    font-size: 125px; 
+    margin-top: -10px;
+    margin-left: 25px; 
+  }
+
+  .icon-overlay.is-pause {
+    margin-left: 0;
+    margin-top: -5px; /* Slight adjustment for visual centering of pause */
+  }
+
+  /* Removed #shield:active scaling to prevent shrinking */
 </style>
 </head>
 <body>
-<video id="v" autoplay loop muted playsinline>
+
+<video id="v" loop playsinline>
   <source src="https://raw.githubusercontent.com/TotallyNotHappey/youareanidiot/refs/heads/main/you%20are%20an%20idiot!.mp4" type="video/mp4">
 </video>
-<div id="shield"></div>
+
+<div id="shield">
+  <div id="btn-container">
+    <span class="circle-base">◯</span>
+    <span id="icon" class="icon-overlay">▶</span>
+  </div>
+</div>
+
 <script>
   const v = document.getElementById('v');
+  const shield = document.getElementById('shield');
+  const icon = document.getElementById('icon');
+  const btnContainer = document.getElementById('btn-container');
 
-  function tryPlay() {
-    v.muted = true;
-    v.play().then(() => {
-      // Autoplay succeeded muted, now try unmuting
+  // Initial State
+  v.classList.add('greyed');
+
+  function handleToggle() {
+    if (v.paused) {
+      v.play();
       v.muted = false;
-      // If unmuting is blocked, wait for a click
-      if (v.muted) {
-        document.addEventListener('click', () => { v.muted = false; }, { once: true });
-      }
-    }).catch(() => {
-      // Autoplay fully blocked, need a click
-      document.addEventListener('click', () => {
-        v.muted = false;
-        v.play();
-      }, { once: true });
-    });
+      v.classList.remove('greyed');
+      icon.innerText = "⏸"; 
+      icon.classList.add('is-pause');
+      // Instant hide
+      btnContainer.style.display = "none"; 
+    } else {
+      v.pause();
+      v.classList.add('greyed');
+      icon.innerText = "▶";
+      icon.classList.remove('is-pause');
+      // Instant show
+      btnContainer.style.display = "flex";
+    }
   }
 
-  tryPlay();
+  shield.addEventListener('click', handleToggle);
 
-  // Prevent pausing by any means
-  v.addEventListener('pause', () => v.play());
-  v.addEventListener('ended', () => { v.currentTime = 0; v.play(); });
-  v.addEventListener('volumechange', () => {
-    if (v.volume < 0.9) v.volume = 1;
-  });
-
-  // Block keyboard shortcuts (space, k, m, f, etc.)
+  // Security & Persistence
   document.addEventListener('keydown', e => e.preventDefault());
-
-  // Block right-click context menu
   document.addEventListener('contextmenu', e => e.preventDefault());
-
-  // Keep playing if tab becomes visible again
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && v.paused) v.play();
-  });
+  v.addEventListener('volumechange', () => { if (v.volume < 1) v.volume = 1; });
 </script>
 </body>
 </html>
